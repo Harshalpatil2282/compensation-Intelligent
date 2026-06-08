@@ -30,32 +30,33 @@
 
 ## 📸 Screenshots
 
-> **Add your screenshots here** — take them from `localhost:3000` and drag-drop into this section on GitHub.
-
 <table>
   <tr>
     <td align="center" width="50%">
-      <img src="./public/screenshots/landing.png" alt="Landing Page" width="100%"/>
+      <img width="1363" height="608" alt="Landing Page" src="https://github.com/user-attachments/assets/b81f36a1-ea39-43b6-8ee0-0b3459429def" />
+      <img width="1365" height="611" alt="image" src="https://github.com/user-attachments/assets/bb7d98bf-ad60-426d-a3f0-faefd60205fd" />
       <br/><sub><b>🏠 Landing Page — Hero + Live Data Preview</b></sub>
     </td>
     <td align="center" width="50%">
-      <img src="./public/screenshots/explore.png" alt="Explore Page" width="100%"/>
+      <img width="1363" height="611" alt="image" src="https://github.com/user-attachments/assets/6c041f85-1d0c-486b-ace6-c20ce8135d01" />
+      <img width="1360" height="608" alt="image" src="https://github.com/user-attachments/assets/5fdb0dc1-b76a-40f0-8ab6-4fc175ecfb13" />
       <br/><sub><b>🔍 Compensation Explorer — Filter by Level, Role, Company</b></sub>
     </td>
   </tr>
   <tr>
     <td align="center" width="50%">
-      <img src="./public/screenshots/compare.png" alt="Compare Page" width="100%"/>
+      <img width="1362" height="609" alt="image" src="https://github.com/user-attachments/assets/fa18d695-fd29-4562-b962-f76a3f6344ae" />
+      <img width="1366" height="605" alt="image" src="https://github.com/user-attachments/assets/c90dc396-9ad9-449c-93ec-3838dab93fba" />
       <br/><sub><b>⚖️ Offer Comparison Tool — Side-by-Side with TC Breakdown</b></sub>
     </td>
     <td align="center" width="50%">
-      <img src="./public/screenshots/submit.png" alt="Submit Page" width="100%"/>
+      <img width="1063" height="598" alt="image" src="https://github.com/user-attachments/assets/fb9d54b8-d2a6-4b41-9312-6b1903809ce5" />
+      
       <br/><sub><b>📝 Anonymous Submission — 5-Step Guided Form</b></sub>
     </td>
   </tr>
 </table>
 
-> 📌 **How to add screenshots**: Run `npm run dev`, take browser screenshots, save them to `public/screenshots/`, and they'll appear here automatically on GitHub.
 
 ---
 
