@@ -1,0 +1,65 @@
+# docker-compose.yml — Local development stack
+# Services: Next.js app + PostgreSQL + Redis (optional)
+# Usage: docker-compose up -d
+
+version: '3.9'
+
+services:
+  # PostgreSQL — local development database
+  postgres:
+    image: postgres:16-alpine
+    container_name: compintel-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: compensation_intel
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_dev_password
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis — optional, for production rate limiting with Upstash Redis locally
+  redis:
+    image: redis:7-alpine
+    container_name: compintel-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+
+  # Next.js app (build + run, useful for testing production build locally)
+  # For development, use `npm run dev` directly instead
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    container_name: compintel-app
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      # Use the postgres service URL
+      DATABASE_URL: postgresql://postgres:postgres_dev_password@postgres:5432/compensation_intel?sslmode=disable
+      DIRECT_DATABASE_URL: postgresql://postgres:postgres_dev_password@postgres:5432/compensation_intel?sslmode=disable
+      AUTH_SECRET: dev_secret_change_in_production
+      NEXTAUTH_URL: http://localhost:3000
+      NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      # Only start this service when explicitly requested: docker-compose --profile prod up
+      - prod
+
+volumes:
+  postgres_data:
+  redis_data:

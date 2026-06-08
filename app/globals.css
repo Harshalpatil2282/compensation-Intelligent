@@ -1,0 +1,232 @@
+/* app/globals.css */
+/* Global styles for Compensation Intelligence System */
+/* Design system: dark mode first, slate/indigo palette, glassmorphism accents */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+   CSS CUSTOM PROPERTIES — Design Tokens
+   --------------------------------------------------------------------------- */
+
+:root {
+  /* Brand Colors */
+  --color-brand-50: 238 242 255;
+  --color-brand-100: 224 231 255;
+  --color-brand-500: 99 102 241;
+  --color-brand-600: 79 70 229;
+  --color-brand-700: 67 56 202;
+
+  /* Semantic Colors */
+  --color-success: 34 197 94;
+  --color-warning: 234 179 8;
+  --color-danger: 239 68 68;
+  --color-info: 59 130 246;
+
+  /* Surface Colors (dark mode) */
+  --surface-0: 3 7 18;      /* gray-950 */
+  --surface-1: 15 23 42;    /* slate-900 */
+  --surface-2: 30 41 59;    /* slate-800 */
+  --surface-3: 51 65 85;    /* slate-700 */
+
+  /* Typography */
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+}
+
+/* ---------------------------------------------------------------------------
+   BASE LAYER
+   --------------------------------------------------------------------------- */
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-gray-950 text-gray-100 font-sans;
+  }
+
+  /* Headings */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+
+  /* Focus styles — accessible + beautiful */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-indigo-500;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    @apply w-1.5 h-1.5;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-700 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-600;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   COMPONENT LAYER — Shared component styles
+   --------------------------------------------------------------------------- */
+
+@layer components {
+
+  /* Glass card — subtle frosted glass effect */
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent;
+  }
+
+  /* Animated gradient border */
+  .gradient-border {
+    position: relative;
+    border-radius: 12px;
+  }
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+    z-index: -1;
+  }
+
+  /* Table styles */
+  .data-table th {
+    @apply text-xs font-semibold text-slate-400 uppercase tracking-wider px-4 py-3 text-left;
+  }
+  .data-table td {
+    @apply px-4 py-3 text-sm text-slate-200 border-t border-white/5;
+  }
+  .data-table tr:hover td {
+    @apply bg-white/5;
+  }
+
+  /* Form label */
+  .form-label {
+    @apply block text-sm font-medium text-slate-300 mb-1.5;
+  }
+
+  /* Section heading */
+  .section-heading {
+    @apply text-2xl font-bold text-white;
+  }
+
+  /* Badge variants */
+  .badge-level {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold;
+  }
+
+  /* Skeleton pulse */
+  .skeleton {
+    @apply animate-pulse bg-slate-800 rounded;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   UTILITY LAYER — Custom utilities
+   --------------------------------------------------------------------------- */
+
+@layer utilities {
+  /* Noise texture overlay (for cards) */
+  .noise::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: 0;
+  }
+
+  /* Glow effects */
+  .glow-indigo {
+    box-shadow: 0 0 40px -10px rgb(99 102 241 / 0.4);
+  }
+  .glow-purple {
+    box-shadow: 0 0 40px -10px rgb(139 92 246 / 0.4);
+  }
+
+  /* Tab indicator transition */
+  .tab-active {
+    @apply text-white border-b-2 border-indigo-500;
+  }
+  .tab-inactive {
+    @apply text-slate-400 border-b-2 border-transparent hover:text-slate-200 transition-colors;
+  }
+
+  /* Compensation color coding */
+  .comp-high   { @apply text-emerald-400; }
+  .comp-medium { @apply text-amber-400; }
+  .comp-low    { @apply text-red-400; }
+
+  /* Percentile bar colors */
+  .pct-bar-fill {
+    @apply bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   ANIMATIONS
+   --------------------------------------------------------------------------- */
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px -5px rgb(99 102 241 / 0.3); }
+  50%       { box-shadow: 0 0 40px -5px rgb(99 102 241 / 0.6); }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out both;
+}
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out both;
+}
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgb(30 41 59) 0%,
+    rgb(51 65 85) 50%,
+    rgb(30 41 59) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* Stagger animation delays for list items */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.10s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.20s; }
+.stagger-5 { animation-delay: 0.25s; }

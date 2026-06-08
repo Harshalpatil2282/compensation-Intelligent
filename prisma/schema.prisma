@@ -1,0 +1,340 @@
+// prisma/schema.prisma
+// Compensation Intelligence System — Complete Prisma Schema
+// Database: PostgreSQL (Neon serverless)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Neon uses connection pooling via pgbouncer on the pooled URL
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// ENUMS
+// ---------------------------------------------------------------------------
+
+enum EquityType {
+  RSU
+  OPTIONS
+  PHANTOM
+  ESOP
+  NONE
+}
+
+enum SubmissionSource {
+  SELF
+  OFFER_LETTER
+  PUBLIC
+}
+
+enum SubmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum EducationLevel {
+  HIGH_SCHOOL
+  ASSOCIATE
+  BACHELOR
+  MASTER
+  PHD
+  BOOTCAMP
+  SELF_TAUGHT
+  OTHER
+}
+
+enum CompanySize {
+  STARTUP_1_50
+  SMALL_51_200
+  MEDIUM_201_1000
+  LARGE_1001_5000
+  ENTERPRISE_5000_PLUS
+}
+
+enum LocationTier {
+  TIER_1
+  TIER_2
+  TIER_3
+  REMOTE
+}
+
+// Universal level from L1 (Intern) to L9 (Distinguished Fellow/SVP)
+enum UniversalLevel {
+  L1
+  L2
+  L3
+  L4
+  L5
+  L6
+  L7
+  L8
+  L9
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  MODERATOR
+}
+
+// ---------------------------------------------------------------------------
+// AUTH MODELS (NextAuth v5 + @auth/prisma-adapter)
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          UserRole  @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  compensations Compensation[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ---------------------------------------------------------------------------
+// COMPANY MODELS
+// ---------------------------------------------------------------------------
+
+model Company {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  // URL-safe slug for routing (e.g., "google", "meta", "tcs")
+  slug        String      @unique
+  description String?     @db.Text
+  website     String?
+  logoUrl     String?
+  // Headquarters location
+  hqCity      String?
+  hqCountry   String      @default("US")
+  // Size band for filtering
+  sizeBand    CompanySize @default(STARTUP_1_50)
+  industry    String?     // "Technology", "Finance", "Healthcare", etc.
+  isVerified  Boolean     @default(false) // Verified company profile
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  levels        CompanyLevel[]
+  compensations Compensation[]
+
+  @@index([slug])
+  @@index([name])
+  @@map("companies")
+}
+
+// Company-specific level definitions (e.g., Google L3, Meta E5, TCS Grade D)
+model CompanyLevel {
+  id                    String         @id @default(cuid())
+  companyId             String
+  // The company's internal level code (e.g., "L5", "E5", "SDE III", "Band C")
+  levelCode             String
+  // Human-readable name (e.g., "Senior Software Engineer", "Band C - Senior")
+  levelName             String
+  // Sort order within this company's ladder (lower = more junior)
+  levelOrder            Int
+  // Mapped to our universal L1–L9 system
+  universalLevel        UniversalLevel
+  // Optional: role track this level applies to (null = all tracks)
+  roleTrack             String?
+  createdAt             DateTime       @default(now())
+
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  compensations Compensation[]
+
+  @@unique([companyId, levelCode])
+  @@index([companyId])
+  @@index([universalLevel])
+  @@map("company_levels")
+}
+
+// ---------------------------------------------------------------------------
+// ROLE TAXONOMY
+// ---------------------------------------------------------------------------
+
+// 3-level hierarchy: Track → Family → Specialization
+model RoleTaxonomy {
+  id             String  @id @default(cuid())
+  // Top level: "Engineering", "Product", "Design", "Data", "Business"
+  track          String
+  // Sub-level: "Software Engineering", "Infrastructure", "Data & ML", etc.
+  family         String
+  // Leaf level: "Backend", "Frontend", "SRE", "ML Engineering", etc.
+  specialization String
+  // Slug for filtering: "engineering-software-backend"
+  slug           String  @unique
+  isActive       Boolean @default(true)
+
+  compensations Compensation[]
+
+  @@unique([track, family, specialization])
+  @@index([track])
+  @@index([slug])
+  @@map("role_taxonomy")
+}
+
+// ---------------------------------------------------------------------------
+// LOCATION
+// ---------------------------------------------------------------------------
+
+model Location {
+  id            String       @id @default(cuid())
+  city          String
+  state         String?
+  country       String
+  countryCode   String       // ISO 3166-1 alpha-2 (e.g., "IN", "US", "SG")
+  // COL tier classification
+  tier          LocationTier @default(TIER_2)
+  // Whether this location commonly supports remote-friendly roles
+  remoteFriendly Boolean     @default(false)
+  // Slug for filtering (e.g., "bangalore-in", "san-francisco-us")
+  slug          String       @unique
+  latitude      Float?
+  longitude     Float?
+  createdAt     DateTime     @default(now())
+
+  compensations Compensation[]
+
+  @@unique([city, countryCode])
+  @@index([slug])
+  @@index([tier])
+  @@map("locations")
+}
+
+// ---------------------------------------------------------------------------
+// CORE: COMPENSATION SUBMISSION
+// ---------------------------------------------------------------------------
+
+model Compensation {
+  id String @id @default(cuid())
+
+  // ---- RELATIONAL REFERENCES ----
+  userId         String?    // Nullable: anonymous submissions are allowed
+  companyId      String
+  companyLevelId String?    // Nullable: user may not know exact level
+  locationId     String
+  roleId         String
+
+  // ---- ROLE & LEVEL (denormalized for query performance) ----
+  jobTitle          String         // Free-text title as on offer/payslip
+  universalLevel    UniversalLevel // Derived from companyLevelId or user input
+  companyLevelCode  String?        // The company's own code (e.g., "L5", "E5")
+
+  // ---- BASE SALARY ----
+  baseSalaryLocal   Decimal    @db.Decimal(15, 2) // In local currency
+  baseSalaryUsd     Decimal    @db.Decimal(15, 2) // Normalized to USD
+  currency          String     // ISO 4217 (e.g., "INR", "USD", "EUR")
+  exchangeRateUsed  Decimal    @db.Decimal(15, 6) // Rate at time of submission
+
+  // ---- BONUS ----
+  signingBonus         Decimal? @db.Decimal(15, 2) // One-time, USD normalized
+  annualBonusTargetPct Decimal? @db.Decimal(5, 2)  // e.g., 15.00 = 15%
+  annualBonusActualUsd Decimal? @db.Decimal(15, 2) // Last year actual payout
+
+  // ---- EQUITY ----
+  equityTotalUsd    Decimal?   @db.Decimal(15, 2) // Total grant at grant date
+  equityType        EquityType @default(NONE)
+  equityVestingYears Int       @default(4)         // Standard: 4 years
+  equityCliffMonths  Int       @default(12)         // Standard: 12 month cliff
+  // Computed: equityTotalUsd / equityVestingYears (stored for query perf)
+  equityAnnualUsd   Decimal?   @db.Decimal(15, 2)
+
+  // ---- TOTAL COMP (computed & stored) ----
+  // baseSalaryUsd + annualBonusActualUsd + equityAnnualUsd
+  totalCompUsd      Decimal    @db.Decimal(15, 2)
+
+  // ---- EXPERIENCE ----
+  yoeTotal         Int    // Total years of experience
+  yoeAtCompany     Int    @default(0) // YOE at this specific company
+
+  // ---- CONTEXT ----
+  education        EducationLevel @default(BACHELOR)
+  // Is this a new offer or current salary?
+  isNewOffer       Boolean        @default(true)
+  // How was this data obtained?
+  source           SubmissionSource @default(SELF)
+  // Has this been verified (e.g., offer letter uploaded, future feature)
+  verified         Boolean          @default(false)
+  // Optional additional context
+  notes            String?          @db.Text
+
+  // ---- MODERATION ----
+  status     SubmissionStatus @default(PENDING)
+  reviewedBy String?          // Admin user ID who approved/rejected
+  reviewedAt DateTime?
+  reviewNote String?          @db.Text // Admin's rejection reason
+
+  // ---- TIMESTAMPS ----
+  // When the compensation was effective (offer date or current date)
+  effectiveDate DateTime
+  submittedAt   DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // ---- RELATIONS ----
+  user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  company      Company       @relation(fields: [companyId], references: [id])
+  companyLevel CompanyLevel? @relation(fields: [companyLevelId], references: [id])
+  location     Location      @relation(fields: [locationId], references: [id])
+  role         RoleTaxonomy  @relation(fields: [roleId], references: [id])
+
+  @@index([companyId])
+  @@index([universalLevel])
+  @@index([locationId])
+  @@index([roleId])
+  @@index([totalCompUsd])
+  @@index([status])
+  @@index([submittedAt])
+  @@index([yoeTotal])
+  @@index([currency])
+  @@map("compensations")
+}
