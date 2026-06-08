@@ -234,7 +234,7 @@ compensation-intelligence/
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/compensation-intelligence.git
+git clone https://github.com/Harshalpatil2282/compensation-Intelligent.git
 cd compensation-intelligence
 npm install
 ```
