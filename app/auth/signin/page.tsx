@@ -82,7 +82,7 @@ export default function SignInPage({ searchParams }: SignInPageProps) {
         </div>
 
         <p className="text-center text-xs text-slate-500 mt-6">
-          Anonymous submissions don\'t require sign-in.{' '}
+          Anonymous submissions don&apos;t require sign-in.{' '}
           <a href="/submit" className="text-indigo-400 hover:text-indigo-300 underline">
             Submit without account
           </a>

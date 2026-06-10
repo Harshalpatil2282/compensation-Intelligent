@@ -8,10 +8,7 @@ import { compensationRepository } from '@/features/compensation/repository'
 import { CompareRequestSchema } from '@/features/compensation/schema'
 import { validationError, success, internalError } from '@/lib/api-response'
 import { levelNormalizer, UNIVERSAL_LEVELS } from '@/lib/level-normalization'
-import {
-  calculateTotalComp,
-  normalizeToUSD,
-} from '@/lib/compensation-calculator'
+import { calculateTotalComp } from '@/lib/compensation-calculator'
 
 // Result type for comparison
 export interface OfferComparisonItem {

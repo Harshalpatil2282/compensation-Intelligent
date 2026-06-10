@@ -12,7 +12,6 @@ import {
   success,
   created,
   validationError,
-  unauthorized,
   internalError,
 } from '@/lib/api-response'
 
