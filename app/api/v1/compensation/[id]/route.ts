@@ -7,10 +7,11 @@ import { notFound, success, internalError } from '@/lib/api-response'
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const record = await compensationRepository.findById(params.id)
+    const { id } = await params
+    const record = await compensationRepository.findById(id)
 
     if (!record || record.status !== 'APPROVED') {
       return notFound('Compensation record')

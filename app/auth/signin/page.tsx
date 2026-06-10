@@ -11,12 +11,13 @@ export const metadata: Metadata = {
 }
 
 interface SignInPageProps {
-  searchParams: { callbackUrl?: string; error?: string }
+  searchParams: Promise<{ callbackUrl?: string; error?: string }>
 }
 
-export default function SignInPage({ searchParams }: SignInPageProps) {
-  const callbackUrl = searchParams.callbackUrl ?? '/explore'
-  const error = searchParams.error
+export default async function SignInPage({ searchParams }: SignInPageProps) {
+  const params = await searchParams
+  const callbackUrl = params.callbackUrl ?? '/explore'
+  const error = params.error
 
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
