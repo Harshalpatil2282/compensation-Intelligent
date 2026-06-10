@@ -12,8 +12,10 @@ import type { NextAuthConfig } from 'next-auth'
 import GitHub from 'next-auth/providers/github'
 import Google from 'next-auth/providers/google'
 
-// Routes that require an authenticated session
-const PROTECTED_PATHS = ['/submit', '/admin', '/api/v1/admin']
+// Routes that require an authenticated session.
+// NOTE: /submit is intentionally NOT protected — submissions are anonymous by design.
+// Users may optionally sign in to link a submission to their account, but it is not required.
+const PROTECTED_PATHS = ['/admin', '/api/v1/admin']
 
 export const authConfig: NextAuthConfig = {
   providers: [
